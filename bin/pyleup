@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+import os, sys
+import click
+
+from ..pyleup.coverage import gen_coverage_file
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@click.argument('bam')
+@click.option('--output', '-o', help='string to output directory')
+@click.option('--verbose/--no-verbose', default=False)
+def pileup(bam, output, verbose):
+    """ Generate bam pileup visualization
+
+    Arguments:
+    bam -- String path to bam file
+    """
+    coverage_fp = gen_coverage_file(bam=bam, output=output, verbose=verbose)
+
+    
+if __name__ == "__main__":
+    cli(obj={})
