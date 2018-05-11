@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),
     scripts=['bin/pyleup'],
 
-    install_requires=['pysam', 'seaborn'],
+    install_requires=[],
 
     author='Jordan Gumm',
     author_email='jordan@variantanalytics.com',
