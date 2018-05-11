@@ -60,7 +60,7 @@ def parse(samfile,coverage):
     return coverage
 
 
-def process(inputfile,outputfile):
+def process_bam(inputfile,outputfile):
     samfile = pysam.AlignmentFile(inputfile, "rb")
     print 'samfile: {}'.format(samfile)
     contigs_size=get_seq_len_from_bam(samfile)
@@ -71,7 +71,10 @@ def process(inputfile,outputfile):
     for contig,vector in coverage.items():
         print 'contig: {}'.format(contig)
         print 'vector: {}'.format(vector)
-        if vector['nb_bp'] == 0: continue
+        if vector['nb_bp'] == 0: # no reads, so output blank file
+            output = pandas.DataFrame()
+            output.to_csv(outputfile, index=False)
+            continue
         temp = {}
         for i in contigs_size:
             print 'contig size: {}'.format(i)
@@ -93,15 +96,3 @@ def process(inputfile,outputfile):
         output.to_csv(outputfile, index=False)
     samfile.close()
 
-
-@click.command()
-@click.option('-b', '--bam')
-@click.option('-o', '--output')
-@click.option('-v', '--verbose')
-def gen_coverage_file(bam, output, verbose):
-    output_fp = os.path.join(output, bam.split('/')[-1].replace('.bam', '_coverage.csv'))
-    process(bam, output_fp)
-    return output_fp
-
-if __name__ == "__main__":
-    gen_coverage_file()
