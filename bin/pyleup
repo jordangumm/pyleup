@@ -4,6 +4,7 @@ import os, sys
 import click
 
 from pyleup.coverage import process_bam
+from pyleup.visualize import gen_scatter
 
 
 @click.group()
@@ -13,17 +14,17 @@ def cli():
 
 @cli.command()
 @click.argument('bam')
-@click.option('--output', '-o', help='string to output directory', default='.')
+@click.option('--output_dp', '-o', help='string to output directory', default='.')
 @click.option('--verbose/--no-verbose', default=False)
-def visualize(bam, output, verbose):
+def visualize(bam, output_dp, verbose):
     """ Generate bam pileup visualization
 
     Arguments:
     bam -- String path to bam file
     """
-    coverage_fp = os.path.join(output, bam.split('/')[-1].replace('.bam', '_coverage.csv'))
-    process_bam(bam, coverage_fp) 
-
+    coverage_fp, reads_fp = process_bam(bam, output_dp)
+    gen_scatter(coverage_fp, reads_fp, output_dp)
     
+
 if __name__ == "__main__":
     cli()
