@@ -1,9 +1,22 @@
 import os
 import sys
 
-
 import pandas as pd
 import numpy as np
+
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+import seaborn as sns; sns.set(style='white', color_codes=True)
+
+
+def write_no_image(output_dp, message):
+    import subprocess
+    import random, string
+    r = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+    output_fp = os.path.join(output_dp, 'no_png_{}.txt'.format(r))
+    print(output_fp)
+    subprocess.call('echo "{}" > {}'.format(message, output_fp), shell=True)
 
 
 def gen_scatter(coverage_fp, reads_fp, output_dp):
@@ -12,15 +25,24 @@ def gen_scatter(coverage_fp, reads_fp, output_dp):
     Arguments
     reads_fp -- String file path to reads csv file created in coverage.py process
     """
-    coverage_df = pd.read_csv(coverage_fp)
+    try:
+        coverage_df = pd.read_csv(coverage_fp)
+    except Exception as e:
+        print(e)
+        write_no_image(output_dp, '[WARNING]: No coverage to make visualization.')
+        return
+        
     for key in ['length', 'number_bp', 'number_reads', 'ratio_covered']:
         if key not in coverage_df.keys():
-            sys.exit('Missing column(s):\n[ERROR]: {} not in {}'.format(key, coverage_fp))
+            msg = 'Missing column(s):\n[WARNING]: {} not in {}'.format(key, coverage_fp)
+            write_no_image(output_dp, msg)
+            return
 
     reads_df = pd.read_csv(reads_fp)
     for key in ['read_length', 'mapq', 'start', 'end', 'reference']:
         if key not in reads_df.keys():
-            sys.exit('Missing column(s):\n[ERROR]: {} not in {}'.format(key, reads_fp))
+            msg = 'Missing column(s):\n[WARNING]: {} not in {}'.format(key, reads_fp)
+            write_no_image(output_dp, msg)
 
     for ref in reads_df['reference'].unique():
         ref_reads = reads_df[reads_df['reference'] == ref]
@@ -30,11 +52,6 @@ def gen_scatter(coverage_fp, reads_fp, output_dp):
                 x.append(pos)
                 y.append(read['mapq'])
                 r.append(ref)
-
-        import matplotlib as mpl
-        mpl.use('Agg')
-        import matplotlib.pyplot as plt
-        import seaborn as sns; sns.set(style='white', color_codes=True)
 
         df = pd.DataFrame({'Mapped Reads': x, 'Mapping Quality': y})
         g = sns.jointplot(x='Mapped Reads', y='Mapping Quality', data=df, stat_func=None, s=5,
