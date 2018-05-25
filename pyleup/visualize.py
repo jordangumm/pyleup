@@ -5,12 +5,6 @@ import sys
 import pandas as pd
 import numpy as np
 
-from bokeh.layouts import row, column
-from bokeh.models import BoxSelectTool, LassoSelectTool, Spacer
-from bokeh.plotting import figure, show, curdoc
-from bokeh.io import export_png
-
-
 
 def gen_scatter(coverage_fp, reads_fp, output_dp):
     """ Generate scatter plot of preprocessed read positions
